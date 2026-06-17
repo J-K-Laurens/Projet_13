@@ -1,50 +1,90 @@
-<div class="chat-container">
-  <h1>POC Chat</h1>
+<div style="max-width: 600px; margin: 40px auto; font-family: sans-serif;">
 
-  <!-- Écran de connexion -->
-  <div *ngIf="!isConnected" class="join-section">
-    <div>
-      <label>Votre nom :</label>
-      <input [(ngModel)]="senderName" placeholder="Entrez votre nom" />
-    </div>
+  <!-- Formulaire de connexion, affiché tant qu'on n'est pas connecté -->
+  <div *ngIf="!isConnected">
+    <h2>Rejoindre le chat</h2>
 
-    <div>
-      <label>Type :</label>
-      <select [(ngModel)]="senderType">
-        <option value="user">Client</option>
-        <option value="agent">Agent Support</option>
-      </select>
-    </div>
+    <label for="senderName">Votre nom :</label>
+    <input id="senderName" [(ngModel)]="senderName" placeholder="Ex : Alice" />
 
-    <div>
-      <label>Session ID (optionnel) :</label>
-      <input [(ngModel)]="inputSessionId" placeholder="Laisser vide pour générer automatiquement" />
-    </div>
+    <br /><br />
 
-    <button (click)="join()" class="btn-primary">Rejoindre le chat</button>
+    <label for="senderType">Votre rôle :</label>
+    <select id="senderType" [(ngModel)]="senderType">
+      <option value="user">Client</option>
+      <option value="agent">Agent support</option>
+    </select>
+
+    <br /><br />
+
+    <label for="inputSessionId">Session ID (optionnel - pour rejoindre une session existante) :</label>
+    <input 
+      id="inputSessionId" 
+      [(ngModel)]="inputSessionId" 
+      placeholder="Laisser vide pour créer une nouvelle session" 
+    />
+
+    <br /><br />
+
+    <button (click)="join()" style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
+      Rejoindre
+    </button>
   </div>
 
-  <!-- Écran du chat -->
-  <div *ngIf="isConnected" class="chat-section">
-    <h2>Chat - Session: {{ sessionId }}</h2>
-
-    <!-- Liste des messages -->
-    <div class="messages-container">
-      <div *ngFor="let msg of messages" [ngClass]="'message-' + msg.senderType" class="message">
-        <strong>{{ msg.senderName }} ({{ msg.senderType }}):</strong>
-        <p>{{ msg.content }}</p>
+  <!-- Interface de chat, affichée une fois connecté -->
+  <div *ngIf="isConnected">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <div>
+        <h2 style="margin: 0;">Chat en direct — {{ senderName }} ({{ senderType }})</h2>
+        <p style="color: #666; font-size: 12px; margin: 5px 0;">
+          Session ID: <strong>{{ sessionId }}</strong>
+          <button 
+            (click)="copySessionId()" 
+            style="margin-left: 10px; padding: 5px 10px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;"
+          >
+            Copier
+          </button>
+        </p>
+      </div>
+      <div>
+        <button 
+          (click)="leave()" 
+          style="background-color: #f44336; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;"
+        >
+          Quitter
+        </button>
       </div>
     </div>
 
-    <!-- Champ d'entrée de message --> 
-    <div class="input-container">
-      <input 
-        [(ngModel)]="newMessage" 
-        (keypress)="handleKeyPress($event)"
+    <!-- Liste des messages -->
+    <div style="border: 1px solid #ccc; height: 300px; overflow-y: auto; padding: 10px; margin-bottom: 10px; background-color: #f9f9f9;">
+      <div *ngFor="let msg of messages" style="margin-bottom: 12px; padding: 8px; background-color: white; border-left: 3px solid #2196F3; border-radius: 4px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+          <strong>{{ msg.senderName }}</strong>
+          <span style="color: #999; font-size: 12px;">{{ msg.senderType }}</span>
+        </div>
+        <p style="margin: 0; color: #333;">{{ msg.content }}</p>
+      </div>
+      <div *ngIf="messages.length === 0" style="color: grey; text-align: center; padding: 20px;">
+        Aucun message pour le moment... Soyez le premier à écrire !
+      </div>
+    </div>
+
+    <!-- Champ d'envoi -->
+    <div style="display: flex; gap: 5px;">
+      <input
+        [(ngModel)]="newMessage"
         placeholder="Votre message..."
-        class="message-input"
+        style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;"
+        (keyup.enter)="send()"
       />
-      <button (click)="send()" class="btn-primary">Envoyer</button>
+      <button 
+        (click)="send()" 
+        style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;"
+      >
+        Envoyer
+      </button>
     </div>
   </div>
+
 </div>

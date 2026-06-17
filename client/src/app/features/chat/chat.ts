@@ -101,13 +101,33 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
   }
 
+    /**
+   * Quitter la session en cours & Reinitialiser l'interface
+   */
+  leave(): void {
+  console.log('Leaving chat session:', this.sessionId);
+  this.wsService.disconnect();
+  this.subscription.unsubscribe();
+  this.isConnected = false;
+  this.messages = [];
+  this.sessionId = '';
+  this.inputSessionId = '';
+  this.senderName = '';
+  this.newMessage = '';
+}
+
   /**
-   * Quitter le chat
+   * Nettoyage quand le composant est détruit
    */
   ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
+    if (this.isConnected) {
+        this.subscription.unsubscribe();
+        this.wsService.disconnect();
     }
-    this.wsService.disconnect();
   }
+
+  copySessionId(): void {
+    navigator.clipboard.writeText(this.sessionId);
+  }
+  
 }
