@@ -1,0 +1,50 @@
+<div class="chat-container">
+  <h1>POC Chat</h1>
+
+  <!-- Écran de connexion -->
+  <div *ngIf="!isConnected" class="join-section">
+    <div>
+      <label>Votre nom :</label>
+      <input [(ngModel)]="senderName" placeholder="Entrez votre nom" />
+    </div>
+
+    <div>
+      <label>Type :</label>
+      <select [(ngModel)]="senderType">
+        <option value="user">Client</option>
+        <option value="agent">Agent Support</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Session ID (optionnel) :</label>
+      <input [(ngModel)]="inputSessionId" placeholder="Laisser vide pour générer automatiquement" />
+    </div>
+
+    <button (click)="join()" class="btn-primary">Rejoindre le chat</button>
+  </div>
+
+  <!-- Écran du chat -->
+  <div *ngIf="isConnected" class="chat-section">
+    <h2>Chat - Session: {{ sessionId }}</h2>
+
+    <!-- Liste des messages -->
+    <div class="messages-container">
+      <div *ngFor="let msg of messages" [ngClass]="'message-' + msg.senderType" class="message">
+        <strong>{{ msg.senderName }} ({{ msg.senderType }}):</strong>
+        <p>{{ msg.content }}</p>
+      </div>
+    </div>
+
+    <!-- Champ d'entrée de message -->
+    <div class="input-container">
+      <input 
+        [(ngModel)]="newMessage" 
+        (keypress)="handleKeyPress($event)"
+        placeholder="Votre message..."
+        class="message-input"
+      />
+      <button (click)="send()" class="btn-primary">Envoyer</button>
+    </div>
+  </div>
+</div>
