@@ -9,7 +9,7 @@ import * as Stomp from '@stomp/stompjs';
 })
 export class Websocket {
   private client: any;
-  private messageSubject = new Subject<any>(); // Utiliser Subject au lieu de BehaviorSubject pour ne pas conserver les anciens messages
+  private messageSubject = new Subject<any>(); // Utilisation de Subject pour ne pas conserver les anciens messages
   public messages$: Observable<any> = this.messageSubject.asObservable();
   private connected = false;
   private subscriptions: any[] = []; // Tracer les subscriptions STOMP pour les nettoyer
