@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import * as Stomp from '@stomp/stompjs';
 
-// Service -> encapsuler lalogique STOMP.
+// Service -> encapsuler la logique STOMP.
 //Objectif : Connexion au serveur, abonnement aux topics, exposition des messages (RxJs) (+gestion de l'historique des messages)
 @Injectable({
   providedIn: 'root'
 })
 export class Websocket {
   private client: any;
-  private messageSubject = new BehaviorSubject<any>(null);
+  private messageSubject = new Subject<any>(); // Utiliser Subject au lieu de BehaviorSubject pour ne pas conserver les anciens messages
   public messages$: Observable<any> = this.messageSubject.asObservable();
   private connected = false;
+  private subscriptions: any[] = []; // Tracer les subscriptions STOMP pour les nettoyer
 
   constructor() {
     // Initialiser le client STOMP
@@ -46,26 +47,31 @@ export class Websocket {
     this.connected = true;
     const sessionId = this.client.sessionId;
 
+    // Nettoyer les anciennes subscriptions avant d'en créer de nouvelles
+    this.cleanupSubscriptions();
+
     // S'abonner au topic de cette session pour recevoir les nouveaux messages
-    this.client.subscribe(`/topic/support-chat/${sessionId}`, (message: any) => {
+    const msgSub = this.client.subscribe(`/topic/support-chat/${sessionId}`, (message: any) => {
       console.log('Message reçu:', message.body);
       const parsedMessage = JSON.parse(message.body);
       this.messageSubject.next(parsedMessage);
     });
+    this.subscriptions.push(msgSub);
 
     // S'abonner au topic de l'historique pour recevoir les anciens messages
     const clientId = 'client-' + Math.random().toString(36).substring(7);
-    this.client.subscribe(`/topic/chat-history-${clientId}`, (message: any) => {
+    const historySub = this.client.subscribe(`/topic/chat-history-${clientId}`, (message: any) => {
       console.log('Historique reçu:', message.body);
       const messages = JSON.parse(message.body);
       messages.forEach((msg: any) => this.messageSubject.next(msg));
     });
+    this.subscriptions.push(historySub);
 
     // Demander l'historique
     this.client.publish({
       destination: '/app/chat.history',
       body: JSON.stringify({ sessionId, clientId })
-    });
+    }); 
   }
 
   /**
@@ -92,9 +98,24 @@ export class Websocket {
   }
 
   /**
+   * Nettoyer les subscriptions STOMP
+   */
+  private cleanupSubscriptions(): void {
+    this.subscriptions.forEach(sub => {
+      try {
+        sub.unsubscribe();
+      } catch (e) {
+        console.warn('Erreur en nettoyant la subscription:', e);
+      }
+    });
+    this.subscriptions = [];
+  }
+
+  /**
    * Se déconnecter
    */
   disconnect(): void {
+    this.cleanupSubscriptions();
     if (this.client && this.connected) {
       this.client.deactivate();
     }
