@@ -6,7 +6,7 @@ public class ChatMessage {
     private String content;
     private String sessionId;
 
-    // Constructeur vide obligatoire pour Spring
+    // Classe représentant un message
     public ChatMessage() {}
 
     // Getters et Setters
