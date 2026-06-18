@@ -94,6 +94,15 @@ serveur/src/main/java/com/yourcaryourway/poc/
 
 Modifiable dans [websocket.ts](client/src/app/features/chat/websocket.ts#L16)
 
+## 📊 Vers la Production
+
+Voir [database/poc-chat.sql](database/poc-chat.sql) pour un aperçu du schéma de base de données prévu pour la version finale.
+
+Cette SQL montre:
+- Tables pour persister les sessions, messages et utilisateurs
+- Schéma prêt pour migration vers production
+- Exemple de structure relationnelle recommandée
+
 ## ⚠️ Notes POC
 
 - Messages stockés **en mémoire** (perdu au redémarrage)
