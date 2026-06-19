@@ -20,7 +20,7 @@ updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
 deleted_at TIMESTAMP
 );
 
-CREATE TABLE "ChatSession" (
+CREATE TABLE "chat_session" (
 id SERIAL PRIMARY KEY,
 user_id INT NOT NULL,
 started_at TIMESTAMP NOT NULL DEFAULT NOW(),
