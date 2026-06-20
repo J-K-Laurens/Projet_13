@@ -1,8 +1,8 @@
-DROP TABLE IF EXISTS "ChatMessage" CASCADE;
-DROP TABLE IF EXISTS "ChatSession" CASCADE;
-DROP TABLE IF EXISTS "SupportMessage" CASCADE;
-DROP TABLE IF EXISTS "User" CASCADE;
-CREATE TABLE "User" (
+DROP TABLE IF EXISTS "chat_message" CASCADE;
+DROP TABLE IF EXISTS "chat_session" CASCADE;
+DROP TABLE IF EXISTS "support_message" CASCADE;
+DROP TABLE IF EXISTS "user" CASCADE;
+CREATE TABLE "user" (
 id SERIAL PRIMARY KEY,
 email VARCHAR(255) NOT NULL UNIQUE,
 password_hash VARCHAR(255) NOT NULL,
@@ -28,11 +28,11 @@ ended_at TIMESTAMP,
 status VARCHAR(50) NOT NULL DEFAULT 'active',
 
 CONSTRAINT fk_chatsession_user
-FOREIGN KEY (user_id) REFERENCES "User"(id) ON DELETE CASCADE
+FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE
 
 );
 
-CREATE TABLE "ChatMessage" (
+CREATE TABLE "chat_message" (
 id SERIAL PRIMARY KEY,
 session_id INT NOT NULL,
 sender_type VARCHAR(50) NOT NULL, -- ex: 'user', 'agent', 'bot'
@@ -40,9 +40,9 @@ sender_id INT NOT NULL,
 content TEXT NOT NULL,
 sent_at TIMESTAMP NOT NULL DEFAULT NOW(),
 CONSTRAINT fk_chatmessage_session
-FOREIGN KEY (session_id) REFERENCES "ChatSession"(id) ON DELETE CASCADE
+FOREIGN KEY (session_id) REFERENCES "chat_session"(id) ON DELETE CASCADE
 );
-CREATE TABLE "SupportMessage" (
+CREATE TABLE "support_message" (
 id SERIAL PRIMARY KEY,
 user_id INT NOT NULL,
 subject VARCHAR(255),
@@ -52,14 +52,14 @@ agent_response TEXT,
 responded_at TIMESTAMP,
 created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 CONSTRAINT fk_supportmessage_user
-FOREIGN KEY (user_id) REFERENCES "User"(id) ON DELETE CASCADE
+FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE
 );
 
 --Indexes pour amélirer les performances des requêtes
-CREATE INDEX idx_chatsession_user_id ON "ChatSession"(user_id);
-CREATE INDEX idx_chatmessage_session_id ON "ChatMessage"(session_id);
-CREATE INDEX idx_supportmessage_user_id ON "SupportMessage"(user_id);
-CREATE INDEX idx_user_email ON "User"(email);
+CREATE INDEX idx_chatsession_user_id ON "chat_session"(user_id);
+CREATE INDEX idx_chatmessage_session_id ON "chat_message"(session_id);
+CREATE INDEX idx_supportmessage_user_id ON "support_message"(user_id);
+CREATE INDEX idx_user_email ON "user"(email);
 
 -- Trigger -> Evite de gérer updated_at manuellement côté applicatif
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -71,6 +71,6 @@ END;
 
 LANGUAGE plpgsql;
 CREATE TRIGGER trg_user_updated_at
-BEFORE UPDATE ON "User"
+BEFORE UPDATE ON "user"
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
